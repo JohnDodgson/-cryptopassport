@@ -31,7 +31,8 @@ import {
   Plus,
   BookOpen,
   HelpCircle,
-  Twitter
+  Twitter,
+  Github
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -709,6 +710,15 @@ export default function App() {
               Contact me on X
               <Twitter size={20} />
             </a>
+            <a 
+              href="https://github.com/JohnDodgson/-cryptopassport" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="px-10 py-5 bg-white/5 border border-white/10 rounded-2xl text-lg font-bold flex items-center gap-3 hover:bg-white/10 transition-all"
+            >
+              View on GitHub
+              <Github size={20} />
+            </a>
           </div>
         </div>
       </section>
@@ -734,7 +744,7 @@ export default function App() {
             <h4 className="font-bold mb-6 uppercase text-xs tracking-widest text-gray-400">Community</h4>
             <ul className="space-y-4 text-sm text-gray-500">
               <li><a href="https://x.com/johndodgson6" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">X (Twitter)</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">GitHub</a></li>
+              <li><a href="https://github.com/JohnDodgson/-cryptopassport" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a></li>
             </ul>
           </div>
         </div>
