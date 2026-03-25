@@ -58,13 +58,19 @@ const Badge = ({ children, icon: Icon }: { children: React.ReactNode, icon: any 
   </div>
 );
 
-const FeatureCard = ({ icon: Icon, title, description }: { icon: any, title: string, description: string }) => (
-  <div className="glass-panel p-8 hover:midnight-glow transition-all duration-500 group">
+const FeatureCard = ({ icon: Icon, title, description, onClick }: { icon: any, title: string, description: string, onClick?: () => void, key?: string }) => (
+  <div 
+    onClick={onClick}
+    className="glass-panel p-8 hover:midnight-glow transition-all duration-500 group cursor-pointer"
+  >
     <div className="w-12 h-12 bg-midnight-purple/10 rounded-2xl flex items-center justify-center mb-6 text-midnight-purple group-hover:scale-110 transition-transform">
       <Icon size={24} />
     </div>
     <h3 className="text-xl font-semibold mb-3">{title}</h3>
     <p className="text-gray-400 text-sm leading-relaxed">{description}</p>
+    <div className="mt-4 text-midnight-purple text-xs font-bold uppercase tracking-widest flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      Learn More <ArrowRight size={14} />
+    </div>
   </div>
 );
 
@@ -93,6 +99,47 @@ export default function App() {
   const [showRisks, setShowRisks] = useState(false);
   const [showDocs, setShowDocs] = useState(false);
   const [showFAQ, setShowFAQ] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
+  const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
+
+  const featureDetails: Record<string, { icon: any, title: string, summary: string, detail: string }> = {
+    "Direct Transfer Recovery": {
+      icon: Wand2,
+      title: "Direct Transfer Recovery",
+      summary: "Set-and-forget ZK-Delegation to a designated root handle. No passwords required for heirs, just a 30-day wait.",
+      detail: "This system uses Midnight's zero-knowledge proofs to ensure that assets are only transferred when specific conditions are met, without ever revealing the underlying logic or the identity of the heirs on the public ledger. It's a truly decentralized inheritance mechanism."
+    },
+    "30-Day Veto Window": {
+      icon: Clock,
+      title: "30-Day Veto Window",
+      summary: "Every claim triggers a 30-day safe-lock. If you're alive, you can veto any claim with a single click.",
+      detail: "This provides a critical safety net against premature or fraudulent claims. The veto action is a simple on-chain transaction that resets the timer and notifies the system that the original owner is still in control. It ensures you always have the final word."
+    },
+    "ZK-Privacy": {
+      icon: Shield,
+      title: "ZK-Privacy",
+      summary: "Your inheritance plan, next-of-kin, and asset details are never visible on-chain. Only the proof of compliance exists.",
+      detail: "By leveraging Midnight's private state, Family Heirloom ensures that your most sensitive legacy arrangements remain confidential, protecting your family's privacy and security from prying eyes. Only the necessary cryptographic proofs are shared publicly."
+    },
+    "One-Time Fee": {
+      icon: Plus,
+      title: "One-Time Fee",
+      summary: "Pay a small sub-handle registration fee once. Pooled DUST at the $familyheirloom root handle covers all maintenance costs forever.",
+      detail: "The system is designed to be self-sustaining. By staking a small amount of NIGHT at the root level, the generated DUST is used to pay for the minimal on-chain storage and transaction fees required to keep the sub-handles active, removing the need for recurring payments."
+    },
+    "Grandfather Rights": {
+      icon: History,
+      title: "Grandfather Rights",
+      summary: "Early adopters lock in their 100 NIGHT endowment terms forever, regardless of future network changes.",
+      detail: "This ensures that the original promise of a self-funding legacy remains intact for those who supported the project early on, providing long-term stability and predictability for your inheritance plan, even as the broader network evolves."
+    },
+    "Portable Identity": {
+      icon: LifeBuoy,
+      title: "Portable Identity",
+      summary: "Your $cryptopassport is yours. Take it to any Midnight-compatible wallet and your vault follows you.",
+      detail: "Because the system is built on standard Midnight sub-handle protocols, your digital legacy is not tied to a single interface or provider. You have true ownership and portability of your digital identity across the entire Midnight ecosystem."
+    }
+  };
 
   const resetDemo = () => {
     setSetupStep(0);
@@ -173,10 +220,19 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1, duration: 1 }}
-            className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-700"
+            className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8"
           >
             {['Lace', 'Eternl', 'Nami', 'Yoroi'].map(wallet => (
-              <div key={wallet} className="text-xl font-bold tracking-widest">{wallet}</div>
+              <button 
+                key={wallet} 
+                onClick={() => setSelectedWallet(wallet)}
+                className="text-xl font-bold tracking-widest opacity-50 grayscale hover:grayscale-0 hover:opacity-100 hover:scale-110 transition-all duration-300 cursor-pointer flex flex-col items-center gap-4"
+              >
+                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 group-hover:border-midnight-purple/50 transition-colors">
+                  <Wallet size={32} className="text-gray-400 group-hover:text-midnight-purple transition-colors" />
+                </div>
+                {wallet}
+              </button>
             ))}
           </motion.div>
         </div>
@@ -653,36 +709,15 @@ export default function App() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <FeatureCard 
-            icon={Wand2} 
-            title="Direct Transfer Recovery" 
-            description="Set-and-forget ZK-Delegation to a designated root handle. No passwords required for heirs, just a 30-day wait."
-          />
-          <FeatureCard 
-            icon={Clock} 
-            title="30-Day Veto Window" 
-            description="Every claim triggers a 30-day safe-lock. If you're alive, you can veto any claim with a single click."
-          />
-          <FeatureCard 
-            icon={Shield} 
-            title="ZK-Privacy" 
-            description="Your inheritance plan, next-of-kin, and asset details are never visible on-chain. Only the proof of compliance exists."
-          />
-          <FeatureCard 
-            icon={Plus} 
-            title="One-Time Fee" 
-            description="Pay a small sub-handle registration fee once. Pooled DUST at the $familyheirloom root handle covers all maintenance costs forever."
-          />
-          <FeatureCard 
-            icon={History} 
-            title="Grandfather Rights" 
-            description="Early adopters lock in their 100 NIGHT endowment terms forever, regardless of future network changes."
-          />
-          <FeatureCard 
-            icon={LifeBuoy} 
-            title="Portable Identity" 
-            description="Your $cryptopassport is yours. Take it to any Midnight-compatible wallet and your vault follows you."
-          />
+          {Object.values(featureDetails).map((feature) => (
+            <FeatureCard 
+              key={feature.title}
+              icon={feature.icon} 
+              title={feature.title} 
+              description={feature.summary}
+              onClick={() => setSelectedFeature(feature.title)}
+            />
+          ))}
         </div>
       </section>
 
@@ -756,6 +791,156 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* FEATURE DETAIL MODAL */}
+      <AnimatePresence>
+        {selectedFeature && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedFeature(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-2xl glass-panel p-8 md:p-12 border-midnight-purple/30 overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-midnight-purple to-transparent" />
+              
+              <button 
+                onClick={() => setSelectedFeature(null)}
+                className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"
+              >
+                <Plus className="rotate-45" size={24} />
+              </button>
+
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-16 h-16 bg-midnight-purple/10 rounded-2xl flex items-center justify-center text-midnight-purple">
+                  {React.createElement(featureDetails[selectedFeature].icon, { size: 32 })}
+                </div>
+                <h2 className="text-3xl font-bold font-display">{featureDetails[selectedFeature].title}</h2>
+              </div>
+
+              <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
+                <p className="text-white font-medium">{featureDetails[selectedFeature].summary}</p>
+                <p>{featureDetails[selectedFeature].detail}</p>
+              </div>
+
+              <div className="mt-12 pt-8 border-t border-white/5 flex justify-end">
+                <button 
+                  onClick={() => setSelectedFeature(null)}
+                  className="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-bold transition-all"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* WALLET INTERACTION MODAL */}
+      <AnimatePresence>
+        {selectedWallet && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedWallet(null)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-[#1a1a1a] rounded-[32px] border border-white/10 overflow-hidden shadow-2xl"
+            >
+              {/* Mock Wallet Header */}
+              <div className="bg-[#242424] px-6 py-4 flex items-center justify-between border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-midnight-purple rounded-lg flex items-center justify-center text-white font-bold text-xs">
+                    {selectedWallet[0]}
+                  </div>
+                  <span className="font-bold text-sm">{selectedWallet} Wallet</span>
+                </div>
+                <div className="flex gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <div className="w-2 h-2 rounded-full bg-white/10" />
+                </div>
+              </div>
+
+              {/* Mock Wallet Content */}
+              <div className="p-6 space-y-6">
+                <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                  <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Total Balance</div>
+                  <div className="text-2xl font-bold">2,450.00 <span className="text-sm font-normal text-gray-400">ADA</span></div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-4 text-center">
+                  {['Send', 'Receive', 'Stake', 'Swap'].map(action => (
+                    <div key={action} className="space-y-2">
+                      <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mx-auto text-gray-400">
+                        {action === 'Send' && <ArrowRight className="-rotate-45" size={20} />}
+                        {action === 'Receive' && <ArrowRight className="rotate-135" size={20} />}
+                        {action === 'Stake' && <Activity size={20} />}
+                        {action === 'Swap' && <Coins size={20} />}
+                      </div>
+                      <div className="text-[10px] font-medium text-gray-500">{action}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* THE ADDON BUTTON */}
+                <div className="pt-4">
+                  <div className="text-[10px] uppercase tracking-widest text-midnight-purple font-bold mb-3">Midnight Add-ons</div>
+                  <button 
+                    onClick={() => {
+                      setSelectedWallet(null);
+                      const demoElement = document.getElementById('demo');
+                      if (demoElement) demoElement.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="w-full group relative overflow-hidden p-4 rounded-2xl bg-midnight-purple/10 border border-midnight-purple/30 hover:bg-midnight-purple/20 transition-all flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-midnight-purple rounded-xl flex items-center justify-center text-white shadow-lg shadow-midnight-purple/20 group-hover:scale-110 transition-transform">
+                        <HandHeart size={20} />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-bold text-sm text-white">Family Heirloom</div>
+                        <div className="text-[10px] text-gray-400">Digital Legacy & Helpline</div>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} className="text-midnight-purple group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Recent Activity</div>
+                  {[1, 2].map(i => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-white/5 rounded-lg" />
+                        <div className="w-24 h-2 bg-white/10 rounded" />
+                      </div>
+                      <div className="w-12 h-2 bg-white/10 rounded" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Close Hint */}
+              <div className="bg-[#242424] p-4 text-center text-[10px] text-gray-500 font-medium border-t border-white/5">
+                Click anywhere outside to close
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* FAQ MODAL */}
       <AnimatePresence>
