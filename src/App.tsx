@@ -96,6 +96,7 @@ export default function App() {
   const [inheritanceStep, setInheritanceStep] = useState(0);
   const [recoveryPath, setRecoveryPath] = useState<RecoveryPath>('family-password');
   const [heirHandle, setHeirHandle] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   const [showRisks, setShowRisks] = useState(false);
   const [showDocs, setShowDocs] = useState(false);
   const [showFAQ, setShowFAQ] = useState(false);
@@ -145,6 +146,16 @@ export default function App() {
     setSetupStep(0);
     setInheritanceStep(0);
     setHeirHandle('');
+    setIsProcessing(false);
+  };
+
+  const simulateProcess = (nextStep: number, flow: 'setup' | 'inheritance') => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      if (flow === 'setup') setSetupStep(nextStep);
+      else setInheritanceStep(nextStep);
+    }, 2000);
   };
 
   return (
@@ -433,7 +444,38 @@ export default function App() {
             </div>
           </div>
 
-          <div className="p-8 md:p-20 min-h-[600px] flex items-center justify-center">
+          <div className="p-8 md:p-20 min-h-[600px] flex items-center justify-center relative">
+            {isProcessing && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-50 bg-midnight-bg/60 backdrop-blur-md flex flex-col items-center justify-center gap-6"
+              >
+                <div className="relative w-24 h-24">
+                  <motion.div 
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="absolute inset-0 border-4 border-midnight-purple/20 border-t-midnight-purple rounded-full"
+                  />
+                  <div className="absolute inset-4 bg-midnight-purple/10 rounded-full flex items-center justify-center text-midnight-purple">
+                    <Shield size={32} className="animate-pulse" />
+                  </div>
+                </div>
+                <div className="text-center">
+                  <h4 className="text-xl font-bold mb-2">
+                    {demoMode === 'setup' ? 'Securing Legacy...' : 'Verifying Claim...'}
+                  </h4>
+                  <p className="text-gray-500 text-sm font-mono">
+                    {setupStep === 1 ? 'Generating ZK-Proof of Stake...' : 
+                     setupStep === 2 ? 'Registering Sub-handle on Layer 2...' :
+                     inheritanceStep === 1 ? 'Verifying ZK-Death Certificate...' :
+                     'Communicating with Midnight Network...'}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
             <AnimatePresence mode="wait">
               {demoMode === 'setup' ? (
                 <motion.div 
@@ -451,7 +493,7 @@ export default function App() {
                       <h3 className="text-3xl font-bold">Start Your Legacy</h3>
                       <p className="text-gray-400">Click the Family Heirloom button in your wallet to begin the setup process.</p>
                       <button 
-                        onClick={() => setSetupStep(1)}
+                        onClick={() => simulateProcess(1, 'setup')}
                         className="w-full py-5 bg-midnight-purple rounded-2xl text-xl font-bold hover:midnight-glow transition-all"
                       >
                         Family Heirloom / Helpline
@@ -474,10 +516,18 @@ export default function App() {
                           <span className="text-gray-400">Staking Deposit</span>
                           <span className="text-white font-bold">100 NIGHT</span>
                         </div>
+                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: 1.5 }}
+                            className="h-full bg-midnight-purple"
+                          />
+                        </div>
                         <p className="text-xs text-gray-500 leading-relaxed">By staking 100 NIGHT, you create a perpetual endowment that fuels your vault forever. You can withdraw this anytime to cancel the vault.</p>
                       </div>
                       <button 
-                        onClick={() => setSetupStep(2)}
+                        onClick={() => simulateProcess(2, 'setup')}
                         className="w-full py-5 bg-midnight-purple rounded-2xl text-xl font-bold"
                       >
                         Stake & Move to Layer 2
@@ -507,6 +557,22 @@ export default function App() {
                             <div className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-500 font-mono">.familyheirloom</div>
                           </div>
                         </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Designated Heir Handle</label>
+                          <div className="relative">
+                            <input 
+                              type="text" 
+                              value={heirHandle}
+                              onChange={(e) => setHeirHandle(e.target.value)}
+                              placeholder="tracydodgson"
+                              className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 font-mono focus:outline-none focus:border-midnight-purple transition-all"
+                            />
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 font-mono">$</div>
+                            <div className="absolute right-6 top-1/2 -translate-y-1/2">
+                              {heirHandle.length > 3 && <CheckCircle2 size={16} className="text-emerald-500" />}
+                            </div>
+                          </div>
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                           <button 
                             onClick={() => setRecoveryPath('family-password')}
@@ -525,8 +591,9 @@ export default function App() {
                         </div>
                       </div>
                       <button 
-                        onClick={() => setSetupStep(3)}
-                        className="w-full py-5 bg-midnight-blue text-black rounded-2xl text-xl font-bold"
+                        disabled={!heirHandle}
+                        onClick={() => simulateProcess(3, 'setup')}
+                        className={`w-full py-5 rounded-2xl text-xl font-bold transition-all ${heirHandle ? 'bg-midnight-blue text-black hover:midnight-glow' : 'bg-white/5 text-gray-500 cursor-not-allowed'}`}
                       >
                         Finalize Setup
                       </button>
@@ -542,6 +609,7 @@ export default function App() {
                       <p className="text-gray-400">Your legacy is now protected by Midnight's ZK-Umbrella. Your heirs can claim it using the same button when the time comes.</p>
                       <div className="bg-white/5 p-6 rounded-3xl border border-white/5 text-left space-y-3">
                         <div className="flex justify-between text-sm"><span className="text-gray-500">Vault Handle</span><span className="font-mono">johnsvault.familyheirloom</span></div>
+                        <div className="flex justify-between text-sm"><span className="text-gray-500">Designated Heir</span><span className="font-mono text-emerald-400">${heirHandle || 'tracydodgson'}</span></div>
                         <div className="flex justify-between text-sm"><span className="text-gray-500">Recovery Mode</span><span className="font-bold capitalize">{recoveryPath.replace('-', ' ')}</span></div>
                         <div className="flex justify-between text-sm"><span className="text-gray-500">Endowment</span><span className="text-midnight-purple font-bold">100 NIGHT Staked</span></div>
                       </div>
@@ -570,7 +638,7 @@ export default function App() {
                       <h3 className="text-3xl font-bold">Claim Inheritance</h3>
                       <p className="text-gray-400">Family members click the <span className="text-white font-bold">exact same button</span> on the owner's device to begin the recovery process.</p>
                       <button 
-                        onClick={() => setInheritanceStep(1)}
+                        onClick={() => simulateProcess(1, 'inheritance')}
                         className="w-full py-5 bg-midnight-blue text-black rounded-2xl text-xl font-bold hover:blue-glow transition-all"
                       >
                         Family Heirloom / Helpline
@@ -595,15 +663,19 @@ export default function App() {
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Death Certificate (ZK-Upload)</label>
-                          <div className="border-2 border-dashed border-white/10 rounded-2xl p-8 text-center hover:border-midnight-blue/50 transition-all cursor-pointer">
-                            <FileText size={32} className="mx-auto mb-4 text-gray-500" />
+                          <div 
+                            onClick={() => simulateProcess(2, 'inheritance')}
+                            className="group border-2 border-dashed border-white/10 rounded-2xl p-8 text-center hover:border-midnight-blue/50 transition-all cursor-pointer relative overflow-hidden"
+                          >
+                            <div className="absolute inset-0 bg-midnight-blue/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <FileText size={32} className="mx-auto mb-4 text-gray-500 group-hover:text-midnight-blue transition-colors" />
                             <p className="text-sm text-gray-400">Drag and drop certificate or click to browse</p>
                             <p className="text-[10px] text-gray-600 mt-2">Midnight will verify the document privately using ZK-Proofs</p>
                           </div>
                         </div>
                       </div>
                       <button 
-                        onClick={() => setInheritanceStep(2)}
+                        onClick={() => simulateProcess(2, 'inheritance')}
                         className="w-full py-5 bg-midnight-blue text-black rounded-2xl text-xl font-bold"
                       >
                         Initiate Claim
@@ -634,15 +706,32 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div className="bg-midnight-purple/5 border border-midnight-purple/20 p-4 rounded-2xl flex gap-3 text-left">
-                        <Shield className="text-midnight-purple shrink-0" size={18} />
-                        <p className="text-xs text-gray-400 leading-relaxed">
-                          If the owner is alive, they can click the button to <span className="text-white font-bold">VETO</span> this claim immediately, locking the vault and flagging the attempt.
-                        </p>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="bg-midnight-purple/5 border border-midnight-purple/20 p-4 rounded-2xl flex gap-3 text-left">
+                          <Shield className="text-midnight-purple shrink-0" size={18} />
+                          <p className="text-xs text-gray-400 leading-relaxed">
+                            If the owner is alive, they can click the button to <span className="text-white font-bold">VETO</span> this claim immediately, locking the vault and flagging the attempt.
+                          </p>
+                        </div>
+                        
+                        <button 
+                          onClick={() => {
+                            setIsProcessing(true);
+                            setTimeout(() => {
+                              setIsProcessing(false);
+                              setInheritanceStep(0);
+                              alert("VETO SUCCESSFUL: Claim cancelled. Vault re-locked.");
+                            }, 1500);
+                          }}
+                          className="w-full py-4 bg-red-500/10 border border-red-500/30 text-red-500 rounded-2xl font-bold hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
+                        >
+                          <AlertTriangle size={18} />
+                          Simulate Owner Veto
+                        </button>
                       </div>
 
                       <button 
-                        onClick={() => setInheritanceStep(3)}
+                        onClick={() => simulateProcess(3, 'inheritance')}
                         className="w-full py-5 bg-white/5 border border-white/10 rounded-2xl text-lg font-bold hover:bg-white/10 transition-all"
                       >
                         Simulate Time Lapse (30 Days)
@@ -670,7 +759,7 @@ export default function App() {
                         <div className="h-px bg-white/10" />
                         <div className="flex justify-between items-center text-xs">
                           <span className="text-gray-500">Recipient</span>
-                          <span className="font-mono">$tracydodgson</span>
+                          <span className="font-mono text-emerald-400">${heirHandle || 'tracydodgson'}</span>
                         </div>
                       </div>
 
